@@ -2,7 +2,7 @@ package com.noradltd.demo.cucumberjvm.example;
 
 public class HelloWorld {
 
-	private String greeting;
+	private final String greeting;
 	
 	public HelloWorld(String greeting) {
 		this.greeting = greeting;
