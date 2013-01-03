@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import cucumber.api.java.After;
+import cucumber.api.java.Before;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
@@ -17,6 +19,36 @@ public class StringReverserStepDefs {
 	private String result;
 	private List<String> results;
 
+	@Before
+	public void before() {
+		System.out.println("before...");
+	}
+	
+	@After
+	public void after() {
+		System.out.println("after...");
+	}
+	
+	@Before("@tableex")
+	public void beforeTableEx() {
+		System.out.println("using tables");
+	}
+	
+	@After("@tableex")
+	public void afterTableEx() {
+		System.out.println("end tables");
+	}
+	
+	@Before("@outlineex")
+	public void beforeOutlineEx() {
+		System.out.println("outline...");
+	}
+	
+	@After("@outlineex")
+	public void afterOutineEx() {
+		System.out.println("...outline");
+	}
+	
 	@Given("^a String Reverser$")
 	public void a_String_Reverser() throws Throwable {
 		stringReverser = new StringReverser();
@@ -47,4 +79,5 @@ public class StringReverserStepDefs {
 			assertThat(resultItr.next(), is(expected));
 		}
 	}
+
 }

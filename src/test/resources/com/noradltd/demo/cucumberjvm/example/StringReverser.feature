@@ -27,6 +27,7 @@ Feature: Reverse Words in a String
     When I reverse the string "Rats Live on no Evil Star"
     Then the result is "Star Evil no on Live Rats"
 
+  @tableex
   Scenario: Consolidated Table Example
     Given a String Reverser
     When I reverse these strings:
@@ -42,6 +43,7 @@ Feature: Reverse Words in a String
       | Development Software Agile of blood life the is Bacon          |
       | Star Evil no on Live Rats                                      |
 
+  @outlineex
   Scenario Outline: Outline Example
     Given a String Reverser
     When I reverse the string "<a string>"
