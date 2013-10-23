@@ -2,7 +2,6 @@ package com.noradltd.demo.cucumberjvm.example;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.text.SimpleDateFormat;
 import java.util.List;
 
 public class OrdersOutputStreamWriter {

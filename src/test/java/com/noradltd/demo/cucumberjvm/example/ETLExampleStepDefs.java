@@ -1,5 +1,8 @@
 package com.noradltd.demo.cucumberjvm.example;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.FileReader;
@@ -21,6 +24,7 @@ public class ETLExampleStepDefs {
 	private OrdersOutputStreamWriter ordersWriter = new OrdersOutputStreamWriter();
 	private List<Order> orders = new ArrayList<Order>();
 	private OutputStream ordersOutputStream = new ByteArrayOutputStream();
+	private OrdersODS ordersODS = new OrdersODS();
 
 	@Given("^a nightly orders load file$")
 	public void a_nightly_orders_load_file() throws Throwable {
@@ -51,8 +55,11 @@ public class ETLExampleStepDefs {
 
 	@Then("^Nightly Orders are loaded into the ODS$")
 	public void Nightly_Orders_are_loaded_into_the_ODS() throws Throwable {
-		// Express the Regexp above with the code you wish you had
-		throw new PendingException();
+		for(Order order : orders) {
+			List<Order> odsMatches = ordersODS.find(order);
+			assertThat(odsMatches.size(), is(1));
+			assertThat(odsMatches.get(0), is(order));
+		}
 	}
 
 	@Given("^an empty nightly orders load file$")
