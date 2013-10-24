@@ -9,64 +9,64 @@ import java.util.List;
 
 public class ETLBogon extends Thread {
 
-	private static final Path dir = Paths.get(".");
+  private static final Path dir = Paths.get(".");
 
-	enum State {
-		READY, RUN, STOP
-	}
+  enum State {
+    READY, RUN, STOP
+  }
 
-	private State state = State.READY;
-	private OrdersODS ods;
-	private Object semaphore;
+  private State state = State.READY;
+  private OrdersODS ods;
+  private Object semaphore;
 
-	public ETLBogon(OrdersODS ordersODS, Object semaphore) {
-		this.ods = ordersODS;
-		this.semaphore = semaphore;
-	}
+  public ETLBogon(OrdersODS ordersODS, Object semaphore) {
+    this.ods = ordersODS;
+    this.semaphore = semaphore;
+  }
 
-	@Override
-	public void run() {
-		state = State.RUN;
-		while (state == State.RUN) {
-			waitForFlatFile();
-		}
-		notifyWaiters();
-	}
+  @Override
+  public void run() {
+    state = State.RUN;
+    while (state == State.RUN) {
+      waitForFlatFile();
+    }
+    notifyWaiters();
+  }
 
-	private void waitForFlatFile() {
-		synchronized (semaphore) {
-			try {
-				semaphore.wait();
-			} catch (InterruptedException e) {
-				// bury
-			}
-		}
-		List<String> csvFiles = Arrays.asList(dir.toFile().list(new FilenameFilter() {
+  private void waitForFlatFile() {
+    synchronized (semaphore) {
+      try {
+        semaphore.wait();
+      } catch (InterruptedException e) {
+        // bury
+      }
+    }
+    List<String> csvFiles = Arrays.asList(dir.toFile().list(new FilenameFilter() {
 
-			@Override
-			public boolean accept(File dir, String name) {
-				return name.endsWith("csv");
-			}
-		}));
-		if (! csvFiles.isEmpty()) {
-			triggerOrdersODSLoader(dir.resolve(csvFiles.get(0)));
-			quit();
-		}
-	}
+      @Override
+      public boolean accept(File dir, String name) {
+        return name.endsWith("csv");
+      }
+    }));
+    if (! csvFiles.isEmpty()) {
+      triggerOrdersODSLoader(dir.resolve(csvFiles.get(0)));
+      quit();
+    }
+  }
 
-	private void triggerOrdersODSLoader(Path filename) {
-		new OrdersODSLoader(ods).load(filename);
-	}
+  private void triggerOrdersODSLoader(Path filename) {
+    new OrdersODSLoader(ods).load(filename);
+  }
 
-	private void notifyWaiters() {
-		synchronized (this) {
-			notifyAll();
-		}
-	}
+  private void notifyWaiters() {
+    synchronized (this) {
+      notifyAll();
+    }
+  }
 
-	public ETLBogon quit() {
-		state = State.STOP;
-		return this;
-	}
+  public ETLBogon quit() {
+    state = State.STOP;
+    return this;
+  }
 
 }
