@@ -1,4 +1,4 @@
-package com.noradltd.demo.cucumberjvm.example;
+package com.noradltd.demo.cucumberjvm.support;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.contains;
@@ -12,6 +12,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.noradltd.demo.cucumberjvm.ordersods.Order;
+import com.noradltd.demo.cucumberjvm.ordersods.OrdersODS;
+import com.noradltd.demo.cucumberjvm.ordersods.OrdersOutputStreamWriter;
 
 import cucumber.api.java.After;
 import cucumber.api.java.Before;

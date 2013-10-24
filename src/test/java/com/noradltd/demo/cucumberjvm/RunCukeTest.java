@@ -1,4 +1,4 @@
-package com.noradltd.demo.cucumberjvm.example;
+package com.noradltd.demo.cucumberjvm;
 
 import org.junit.runner.RunWith;
 

@@ -1,8 +1,10 @@
-package com.noradltd.demo.cucumberjvm.example;
+package com.noradltd.demo.cucumberjvm.ordersods;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
+
+import com.noradltd.demo.cucumberjvm.ordersods.Order;
 
 public class OrdersOutputStreamWriter {
 

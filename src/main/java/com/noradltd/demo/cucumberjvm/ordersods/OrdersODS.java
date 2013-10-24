@@ -1,4 +1,4 @@
-package com.noradltd.demo.cucumberjvm.example;
+package com.noradltd.demo.cucumberjvm.ordersods;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,10 +1,13 @@
-package com.noradltd.demo.cucumberjvm.example;
+package com.noradltd.demo.cucumberjvm.ordersods;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
+
+import com.noradltd.demo.cucumberjvm.ordersods.Order;
+import com.noradltd.demo.cucumberjvm.ordersods.OrdersODS;
 
 public class OrdersODSLoader {
 
