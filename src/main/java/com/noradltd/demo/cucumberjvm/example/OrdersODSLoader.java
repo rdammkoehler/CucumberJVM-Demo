@@ -6,11 +6,11 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 
-public class ODSLoader {
+public class OrdersODSLoader {
 
 	private OrdersODS ordersODS;
 
-	public ODSLoader(OrdersODS ods) {
+	public OrdersODSLoader(OrdersODS ods) {
 		ordersODS = ods;
 	}
 
@@ -34,14 +34,14 @@ public class ODSLoader {
 				ordersODS.commit();
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			ordersODS.log(e.getMessage());
 			ordersODS.log("Corrupt Input File");
 			ordersODS.rollback();
 		} finally {
 			try {
 				reader.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+				//bury
 			}
 		}
 	}

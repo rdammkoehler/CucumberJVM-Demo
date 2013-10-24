@@ -16,3 +16,9 @@ Feature: Load My Data From a Flat File
     When the file arrives on the landing area
     Then no changes occur in the ODS
     And a corrupt file notification is logged
+    
+  Scenario: Partially Corrupt Orders File
+    Given a partially corrupt nightly orders load file
+    When the file arrives on the landing area
+    Then no changes occur in the ODS
+    And a corrupt file notification is logged

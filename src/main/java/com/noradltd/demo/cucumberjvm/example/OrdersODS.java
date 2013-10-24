@@ -19,7 +19,7 @@ public class OrdersODS {
 	}
 
 	public boolean add(Order order) {
-		return orders.add(order);
+		return journal.add(order);
 	}
 
 	public Integer size() {
@@ -35,16 +35,16 @@ public class OrdersODS {
 	}
 
 	public void beginTxn() {
-		journal = new ArrayList<Order>();
+		journal.clear();
 	}
 
 	public void commit() {
 		orders.addAll(journal);
-		journal = null;
+		journal.clear();
 	}
 
 	public void rollback() {
-		journal = null;
+		journal.clear();
 	}
 
 }

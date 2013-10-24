@@ -66,7 +66,7 @@ public class ETLBogon extends Thread {
 				Path name = ev.context();
 				Path filename = dir.resolve(name);
 
-				new ODSLoader(ods).load(filename);
+				new OrdersODSLoader(ods).load(filename);
 
 				synchronized (this) {
 					notifyAll();

@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,14 +54,18 @@ public class ETLExampleStepDefs {
 		new File(ORDERS_CSV).delete();
 	}
 	
-	@Given("^a nightly orders load file$")
-	public void a_nightly_orders_load_file() throws Throwable {
+	private void loadValidOrders() throws ParseException {
 		String[][] ordersData = new String[][] { { "1", "2013-10-23" }, { "2", "2013-10-23" } };
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		for (String[] orderStrings : ordersData) {
 			orders.add(new Order(orderStrings[0], dateFormat.parse(orderStrings[1])));
 		}
 		ordersWriter.write(orders, ordersOutputStream);
+	}
+	
+	@Given("^a nightly orders load file$")
+	public void a_nightly_orders_load_file() throws Throwable {
+		loadValidOrders();
 	}
 
 	@When("^the file arrives on the landing area$")
@@ -113,5 +118,11 @@ public class ETLExampleStepDefs {
 	@Then("^a corrupt file notification is logged$")
 	public void a_corrupt_file_notification_is_logged() throws Throwable {
 		assertThat(ordersODS.log().pop(), is("Corrupt Input File"));
+	}
+	
+	@Given("^a partially corrupt nightly orders load file$")
+	public void a_partially_corrupt_nightly_orders_load_file() throws Throwable {
+		loadValidOrders();
+		ordersOutputStream.write("This file is invalid".getBytes());
 	}
 }
