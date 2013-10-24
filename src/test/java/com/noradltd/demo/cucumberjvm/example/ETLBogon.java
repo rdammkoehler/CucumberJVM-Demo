@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.WatchEvent;
 import java.util.Arrays;
 import java.util.List;
 
@@ -68,11 +67,6 @@ public class ETLBogon extends Thread {
 	public ETLBogon quit() {
 		state = State.STOP;
 		return this;
-	}
-
-	@SuppressWarnings("unchecked")
-	static <T> WatchEvent<T> cast(WatchEvent<?> event) {
-		return (WatchEvent<T>) event;
 	}
 
 }
