@@ -36,34 +36,50 @@ public class ETLBogon extends Thread {
 	public void run() {
 		state = State.RUN;
 		while (state == State.RUN) {
-			WatchKey key = poll();
-			if (key != null) {
-				for (WatchEvent<?> event : key.pollEvents()) {
-					if (!isOverflow(event)) {
-						processEvent(event);
-					}
-				}
-				reset(key);
-			}
+			waitForFlatFile();
 		}
 		notifyWaiters();
 	}
 
-	private boolean isOverflow(WatchEvent<?> event) {
-		Kind<?> kind = event.kind();
-		return (kind == OVERFLOW);
+	private void waitForFlatFile() {
+		WatchKey key = poll();
+		if (key != null) {
+			processEvents(key);
+			reset(key);
+		}
 	}
 
+	private WatchKey poll() {
+		WatchKey key = null;
+		try {
+			key = watcher.poll(1, TimeUnit.SECONDS);
+		} catch (InterruptedException ie) {
+			//bury
+		}
+		return key;
+	}
+
+	private void processEvents(WatchKey key) {
+		for (WatchEvent<?> event : key.pollEvents()) {
+			if (!isOverflow(event)) {
+				processEvent(event);
+			}
+		}
+	}
+	
 	private void processEvent(WatchEvent<?> event) {
 		Path filename = getFilename(event);
-
 		triggerOrdersODSLoader(filename);
-
 		notifyWaiters();
 	}
 
 	private void triggerOrdersODSLoader(Path filename) {
 		new OrdersODSLoader(ods).load(filename);
+	}
+
+	private boolean isOverflow(WatchEvent<?> event) {
+		Kind<?> kind = event.kind();
+		return (kind == OVERFLOW);
 	}
 
 	private Path getFilename(WatchEvent<?> event) {
@@ -83,16 +99,6 @@ public class ETLBogon extends Thread {
 		synchronized (this) {
 			notifyAll();
 		}
-	}
-
-	private WatchKey poll() {
-		WatchKey key = null;
-		try {
-			key = watcher.poll(1, TimeUnit.SECONDS);
-		} catch (InterruptedException ie) {
-			//bury
-		}
-		return key;
 	}
 
 	public ETLBogon quit() {
