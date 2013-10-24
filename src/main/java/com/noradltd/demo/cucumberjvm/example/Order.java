@@ -36,12 +36,12 @@ public class Order {
 		if (orderDate == null) {
 			if (other.orderDate != null)
 				return false;
-		} else if (!orderDate.equals(other.orderDate))
+		} else if (! orderDate.equals(other.orderDate))
 			return false;
 		if (orderNumber == null) {
 			if (other.orderNumber != null)
 				return false;
-		} else if (!orderNumber.equals(other.orderNumber))
+		} else if (! orderNumber.equals(other.orderNumber))
 			return false;
 		return true;
 	}

@@ -48,7 +48,7 @@ public class ETLBogon extends Thread {
 				return name.endsWith("csv");
 			}
 		}));
-		if (!csvFiles.isEmpty()) {
+		if (! csvFiles.isEmpty()) {
 			triggerOrdersODSLoader(dir.resolve(csvFiles.get(0)));
 			quit();
 		}

@@ -25,7 +25,7 @@ public class OrdersODSLoader {
 				String data = reader.readLine();
 				String[] orderStrings = data.split(",");
 				ordersODS.add(new Order(orderStrings[0], dateFormat.parse(orderStrings[1])));
-				lineCount++;
+				lineCount++ ;
 			}
 			if (lineCount == 0) {
 				ordersODS.log("Empty File");
