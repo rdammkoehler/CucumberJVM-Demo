@@ -1,10 +1,10 @@
 package com.noradltd.demo.cucumberjvm.example;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.assertThat;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -30,38 +30,14 @@ public class ETLExampleStepDefs {
 
 	@Before
 	public void beforeETLExampleFeature() {
-		if ( etlBogon == null ) {
-			etlBogon = new ETLBogon(ordersODS);
-			etlBogon.start();
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
+		startETLProcess();
 	}
-	
+
 	@After
 	public void afterELTExampleFeature() {
-		if ( etlBogon != null ) {
-			try {
-				etlBogon.quit().join(10000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			etlBogon = null;
-		}
+		stopETLProcess();
 	}
-	
-	private void loadValidOrders() throws ParseException {
-		String[][] ordersData = new String[][] { { "1", "2013-10-23" }, { "2", "2013-10-23" } };
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-		for (String[] orderStrings : ordersData) {
-			orders.add(new Order(orderStrings[0], dateFormat.parse(orderStrings[1])));
-		}
-		ordersWriter.write(orders, ordersOutputStream);
-	}
-	
+
 	@Given("^a nightly orders load file$")
 	public void a_nightly_orders_load_file() throws Throwable {
 		loadValidOrders();
@@ -70,17 +46,13 @@ public class ETLExampleStepDefs {
 	@When("^the file arrives on the landing area$")
 	public void the_file_arrives_on_the_landing_area() throws Throwable {
 		writeOrdersToFile();
-		synchronized (etlBogon) {			
-			etlBogon.wait(20000);
-		}
+		waitForETLProcess();
 	}
 
 	@Then("^Nightly Orders are loaded into the ODS$")
 	public void Nightly_Orders_are_loaded_into_the_ODS() throws Throwable {
-		for(Order order : orders) {
-			List<Order> odsMatches = ordersODS.find(order);
-			assertThat(odsMatches.size(), is(1));
-			assertThat(odsMatches.get(0), is(order));
+		for (Order order : orders) {
+			assertThat(ordersODS.find(order), contains(order));
 		}
 	}
 
@@ -91,7 +63,7 @@ public class ETLExampleStepDefs {
 
 	@Then("^no changes occur in the ODS$")
 	public void no_changes_occur_in_the_ODS() throws Throwable {
-		assertThat(ordersODS.size(), is(0)); //not really valid, work it out
+		assertThat(ordersODS.size(), is(0)); // not really valid, work it out
 	}
 
 	@Then("^an empty file notification is logged$")
@@ -108,11 +80,20 @@ public class ETLExampleStepDefs {
 	public void a_corrupt_file_notification_is_logged() throws Throwable {
 		assertThat(ordersODS.log().pop(), is("Corrupt Input File"));
 	}
-	
+
 	@Given("^a partially corrupt nightly orders load file$")
 	public void a_partially_corrupt_nightly_orders_load_file() throws Throwable {
 		loadValidOrders();
 		ordersOutputStream.write("This file is invalid".getBytes());
+	}
+
+	private void loadValidOrders() throws ParseException {
+		String[][] ordersData = new String[][] { { "1", "2013-10-23" }, { "2", "2013-10-23" } };
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		for (String[] orderStrings : ordersData) {
+			orders.add(new Order(orderStrings[0], dateFormat.parse(orderStrings[1])));
+		}
+		ordersWriter.write(orders, ordersOutputStream);
 	}
 
 	private void writeOrdersToFile() throws IOException {
@@ -127,4 +108,29 @@ public class ETLExampleStepDefs {
 			writer.close();
 		}
 	}
+
+	private void startETLProcess() {
+		if (etlBogon == null) {
+			etlBogon = new ETLBogon(ordersODS);
+			etlBogon.start();
+		}
+	}
+
+	private void stopETLProcess() {
+		if (etlBogon != null) {
+			try {
+				etlBogon.quit().join(10000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			etlBogon = null;
+		}
+	}
+
+	private void waitForETLProcess() throws InterruptedException {
+		synchronized (etlBogon) {
+			etlBogon.wait(20000);
+		}
+	}
+
 }
