@@ -11,6 +11,7 @@ import com.google.common.collect.Lists;
 public class OrdersODS {
 
 	private List<Order> orders = new ArrayList<Order>();
+	private List<Order> journal = new ArrayList<Order>();
 	private Stack<String> log = new Stack<String>();
 
 	public List<Order> find(Order order) {
@@ -31,6 +32,19 @@ public class OrdersODS {
 	
 	public void log(String message) {
 		log.push(message);
+	}
+
+	public void beginTxn() {
+		journal = new ArrayList<Order>();
+	}
+
+	public void commit() {
+		orders.addAll(journal);
+		journal = null;
+	}
+
+	public void rollback() {
+		journal = null;
 	}
 
 }

@@ -1,12 +1,9 @@
 package com.noradltd.demo.cucumberjvm.example;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.Reader;
 import java.nio.file.Path;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 public class ODSLoader {
@@ -17,13 +14,13 @@ public class ODSLoader {
 		ordersODS = ods;
 	}
 
-	//There is a hole here, a partially corrupt file will modify the ods
 	public void load(Path filename) {
 		BufferedReader reader = null;
 		try {
 			reader = new BufferedReader(new FileReader(filename.toFile()));
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			long lineCount = 0;
+			ordersODS.beginTxn();
 			while (reader.ready()) {
 				String data = reader.readLine();
 				String[] orderStrings = data.split(",");
@@ -32,10 +29,14 @@ public class ODSLoader {
 			}
 			if ( lineCount == 0 ) { 
 				ordersODS.log("Empty File");
+				ordersODS.rollback();
+			} else {
+				ordersODS.commit();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			ordersODS.log("Corrupt Input File");
+			ordersODS.rollback();
 		} finally {
 			try {
 				reader.close();
