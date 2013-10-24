@@ -29,7 +29,7 @@ public class ETLExampleStepDefs {
 	private ETLBogon etlBogon = null;
 
 	@Before
-	public void beforeETLExampleFeature() {
+	public void beforeETLExampleFeature() throws IOException {
 		startETLProcess();
 	}
 
@@ -109,7 +109,7 @@ public class ETLExampleStepDefs {
 		}
 	}
 
-	private void startETLProcess() {
+	private void startETLProcess() throws IOException {
 		if (etlBogon == null) {
 			etlBogon = new ETLBogon(ordersODS);
 			etlBogon.start();

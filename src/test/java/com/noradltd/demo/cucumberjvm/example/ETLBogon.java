@@ -26,63 +26,83 @@ public class ETLBogon extends Thread {
 	private WatchService watcher = null;
 	private static final Path dir = Paths.get(".");
 
-	public ETLBogon(OrdersODS ods) {
+	public ETLBogon(OrdersODS ods) throws IOException {
 		this.ods = ods;
-		try {
-			watcher = FileSystems.getDefault().newWatchService();
-			dir.register(watcher, ENTRY_CREATE, ENTRY_MODIFY);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	static <T> WatchEvent<T> cast(WatchEvent<?> event) {
-		return (WatchEvent<T>) event;
+		watcher = FileSystems.getDefault().newWatchService();
+		dir.register(watcher, ENTRY_CREATE, ENTRY_MODIFY);
 	}
 
 	@Override
 	public void run() {
 		state = State.RUN;
 		while (state == State.RUN) {
-			WatchKey key = null;
-			try {
-				key = watcher.poll(1, TimeUnit.SECONDS);
-			} catch (InterruptedException ie) {
-				ie.printStackTrace();
-			}
-			if (key == null) {
-				continue;
-			}
-			for (WatchEvent<?> event : key.pollEvents()) {
-				Kind<?> kind = event.kind();
-
-				if (kind == OVERFLOW) {
-					System.out.println("OVERFLOW!");
-					continue;
+			WatchKey key = poll();
+			if (key != null) {
+				for (WatchEvent<?> event : key.pollEvents()) {
+					if (!isOverflow(event)) {
+						processEvent(event);
+					}
 				}
-
-				WatchEvent<Path> ev = cast(event);
-				Path name = ev.context();
-				Path filename = dir.resolve(name);
-
-				new OrdersODSLoader(ods).load(filename);
-
-				synchronized (this) {
-					notifyAll();
-				}
-			}
-			if ( ! key.reset() ) {
-				System.err.println("KEY IS NOT ACTIVE, reset failed");
+				reset(key);
 			}
 		}
+		notifyWaiters();
+	}
+
+	private boolean isOverflow(WatchEvent<?> event) {
+		Kind<?> kind = event.kind();
+		return (kind == OVERFLOW);
+	}
+
+	private void processEvent(WatchEvent<?> event) {
+		Path filename = getFilename(event);
+
+		triggerOrdersODSLoader(filename);
+
+		notifyWaiters();
+	}
+
+	private void triggerOrdersODSLoader(Path filename) {
+		new OrdersODSLoader(ods).load(filename);
+	}
+
+	private Path getFilename(WatchEvent<?> event) {
+		WatchEvent<Path> ev = cast(event);
+		Path name = ev.context();
+		Path filename = dir.resolve(name);
+		return filename;
+	}
+
+	private void reset(WatchKey key) {
+		if (!key.reset()) {
+			System.err.println("KEY IS NOT ACTIVE, reset failed");
+		}
+	}
+
+	private void notifyWaiters() {
 		synchronized (this) {
 			notifyAll();
 		}
+	}
+
+	private WatchKey poll() {
+		WatchKey key = null;
+		try {
+			key = watcher.poll(1, TimeUnit.SECONDS);
+		} catch (InterruptedException ie) {
+			//bury
+		}
+		return key;
 	}
 
 	public ETLBogon quit() {
 		state = State.STOP;
 		return this;
 	}
+	
+	@SuppressWarnings("unchecked")
+	static <T> WatchEvent<T> cast(WatchEvent<?> event) {
+		return (WatchEvent<T>) event;
+	}
+
 }
