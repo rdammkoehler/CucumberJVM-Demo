@@ -26,10 +26,10 @@ public class OrdersODS {
 		return orders.size();
 	}
 
-	public Stack<String> log() {	
+	public Stack<String> log() {
 		return log;
 	}
-	
+
 	public void log(String message) {
 		log.push(message);
 	}

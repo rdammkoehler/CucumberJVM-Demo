@@ -27,7 +27,7 @@ public class OrdersODSLoader {
 				ordersODS.add(new Order(orderStrings[0], dateFormat.parse(orderStrings[1])));
 				lineCount++;
 			}
-			if ( lineCount == 0 ) { 
+			if (lineCount == 0) {
 				ordersODS.log("Empty File");
 				ordersODS.rollback();
 			} else {
@@ -41,7 +41,7 @@ public class OrdersODSLoader {
 			try {
 				reader.close();
 			} catch (IOException e) {
-				//bury
+				// bury
 			}
 			filename.toFile().delete();
 		}

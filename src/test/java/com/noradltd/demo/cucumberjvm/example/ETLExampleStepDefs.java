@@ -22,7 +22,7 @@ import cucumber.api.java.en.When;
 public class ETLExampleStepDefs {
 
 	private static final String ORDERS_CSV = "orders.csv";
-	
+
 	private List<Order> orders = new ArrayList<Order>();
 	private OutputStream ordersOutputStream = new ByteArrayOutputStream();
 	private OrdersODS ordersODS = new OrdersODS();
@@ -107,11 +107,14 @@ public class ETLExampleStepDefs {
 		} finally {
 			writer.close();
 		}
+		synchronized (ordersOutputStream) {
+			ordersOutputStream.notifyAll();
+		}
 	}
 
 	private void startETLProcess() throws IOException {
 		if (etlBogon == null) {
-			etlBogon = new ETLBogon(ordersODS);
+			etlBogon = new ETLBogon(ordersODS, ordersOutputStream);
 			etlBogon.start();
 		}
 	}

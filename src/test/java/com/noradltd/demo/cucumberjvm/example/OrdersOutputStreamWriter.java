@@ -12,7 +12,7 @@ public class OrdersOutputStreamWriter {
 				ordersOutputStream.write(order.toString().getBytes());
 				ordersOutputStream.write(System.getProperty("line.separator").getBytes());
 			} catch (IOException e) {
-				//bury
+				// bury
 			}
 		}
 	}

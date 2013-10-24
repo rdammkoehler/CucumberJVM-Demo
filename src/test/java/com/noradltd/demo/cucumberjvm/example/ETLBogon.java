@@ -1,20 +1,16 @@
 package com.noradltd.demo.cucumberjvm.example;
 
-import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
-import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
-import static java.nio.file.StandardWatchEventKinds.OVERFLOW;
-
-import java.io.IOException;
-import java.nio.file.FileSystems;
+import java.io.File;
+import java.io.FilenameFilter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.WatchEvent;
-import java.nio.file.WatchEvent.Kind;
-import java.nio.file.WatchKey;
-import java.nio.file.WatchService;
-import java.util.concurrent.TimeUnit;
+import java.util.Arrays;
+import java.util.List;
 
 public class ETLBogon extends Thread {
+
+	private static final Path dir = Paths.get(".");
 
 	enum State {
 		READY, RUN, STOP
@@ -22,14 +18,11 @@ public class ETLBogon extends Thread {
 
 	private State state = State.READY;
 	private OrdersODS ods;
+	private Object semaphore;
 
-	private WatchService watcher = null;
-	private static final Path dir = Paths.get(".");
-
-	public ETLBogon(OrdersODS ods) throws IOException {
-		this.ods = ods;
-		watcher = FileSystems.getDefault().newWatchService();
-		dir.register(watcher, ENTRY_CREATE, ENTRY_MODIFY);
+	public ETLBogon(OrdersODS ordersODS, Object semaphore) {
+		this.ods = ordersODS;
+		this.semaphore = semaphore;
 	}
 
 	@Override
@@ -42,57 +35,28 @@ public class ETLBogon extends Thread {
 	}
 
 	private void waitForFlatFile() {
-		WatchKey key = poll();
-		if (key != null) {
-			processEvents(key);
-			reset(key);
-		}
-	}
-
-	private WatchKey poll() {
-		WatchKey key = null;
-		try {
-			key = watcher.poll(1, TimeUnit.SECONDS);
-		} catch (InterruptedException ie) {
-			//bury
-		}
-		return key;
-	}
-
-	private void processEvents(WatchKey key) {
-		for (WatchEvent<?> event : key.pollEvents()) {
-			if (!isOverflow(event)) {
-				processEvent(event);
+		synchronized (semaphore) {
+			try {
+				semaphore.wait();
+			} catch (InterruptedException e) {
+				// bury
 			}
 		}
-	}
-	
-	private void processEvent(WatchEvent<?> event) {
-		Path filename = getFilename(event);
-		triggerOrdersODSLoader(filename);
-		notifyWaiters();
+		List<String> csvFiles = Arrays.asList(dir.toFile().list(new FilenameFilter() {
+
+			@Override
+			public boolean accept(File dir, String name) {
+				return name.endsWith("csv");
+			}
+		}));
+		if (!csvFiles.isEmpty()) {
+			triggerOrdersODSLoader(dir.resolve(csvFiles.get(0)));
+			quit();
+		}
 	}
 
 	private void triggerOrdersODSLoader(Path filename) {
 		new OrdersODSLoader(ods).load(filename);
-	}
-
-	private boolean isOverflow(WatchEvent<?> event) {
-		Kind<?> kind = event.kind();
-		return (kind == OVERFLOW);
-	}
-
-	private Path getFilename(WatchEvent<?> event) {
-		WatchEvent<Path> ev = cast(event);
-		Path name = ev.context();
-		Path filename = dir.resolve(name);
-		return filename;
-	}
-
-	private void reset(WatchKey key) {
-		if (!key.reset()) {
-			System.err.println("KEY IS NOT ACTIVE, reset failed");
-		}
 	}
 
 	private void notifyWaiters() {
@@ -105,7 +69,7 @@ public class ETLBogon extends Thread {
 		state = State.STOP;
 		return this;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	static <T> WatchEvent<T> cast(WatchEvent<?> event) {
 		return (WatchEvent<T>) event;
