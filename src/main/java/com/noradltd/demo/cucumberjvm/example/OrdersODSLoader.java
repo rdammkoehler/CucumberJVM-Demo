@@ -43,6 +43,7 @@ public class OrdersODSLoader {
 			} catch (IOException e) {
 				//bury
 			}
+			filename.toFile().delete();
 		}
 	}
 

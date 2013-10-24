@@ -1,4 +1,4 @@
-Feature: Load My Data From a Flat File
+Feature: Load My Data From a CSV File
 
   Scenario: Nightly Orders Load
   	Given a nightly orders load file

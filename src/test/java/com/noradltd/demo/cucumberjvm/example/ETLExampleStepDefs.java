@@ -51,7 +51,6 @@ public class ETLExampleStepDefs {
 			}
 			etlBogon = null;
 		}
-		new File(ORDERS_CSV).delete();
 	}
 	
 	private void loadValidOrders() throws ParseException {
@@ -70,17 +69,7 @@ public class ETLExampleStepDefs {
 
 	@When("^the file arrives on the landing area$")
 	public void the_file_arrives_on_the_landing_area() throws Throwable {
-		FileWriter writer = null;
-		try {
-			writer = new FileWriter(ORDERS_CSV);
-			writer.write(ordersOutputStream.toString());
-			writer.flush();
-		} catch (IOException ioe) {
-			ioe.printStackTrace();
-		} finally {
-			writer.close();
-		}
-		writer = null;
+		writeOrdersToFile();
 		synchronized (etlBogon) {			
 			etlBogon.wait(20000);
 		}
@@ -124,5 +113,18 @@ public class ETLExampleStepDefs {
 	public void a_partially_corrupt_nightly_orders_load_file() throws Throwable {
 		loadValidOrders();
 		ordersOutputStream.write("This file is invalid".getBytes());
+	}
+
+	private void writeOrdersToFile() throws IOException {
+		FileWriter writer = null;
+		try {
+			writer = new FileWriter(ORDERS_CSV);
+			writer.write(ordersOutputStream.toString());
+			writer.flush();
+		} catch (IOException ioe) {
+			ioe.printStackTrace();
+		} finally {
+			writer.close();
+		}
 	}
 }
