@@ -23,7 +23,7 @@ In our case, the Tester is also a Developer.
 The Three Amigos meet to discuss a story and determine what tests would satisfy that story. 
 In the simple case, a happy path story might be;
 
-```gherkin
+```
 	As the Share ODS
 	I want nightly orders transfered from the legacy system into my data structure
 	So that I can serve operational systems with yesterdays data.\*
