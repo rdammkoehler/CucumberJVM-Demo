@@ -23,49 +23,49 @@ In our case, the Tester is also a Developer.
 The Three Amigos meet to discuss a story and determine what tests would satisfy that story. 
 In the simple case, a happy path story might be;
 
->
-> As the Share ODS
-> I want nightly orders transfered from the legacy system into my data structure
-> So that I can serve operational systems with yesterdays data.\*
->
+```gherkin
+	As the Share ODS
+	I want nightly orders transfered from the legacy system into my data structure
+	So that I can serve operational systems with yesterdays data.\*
+```
 
 <em>\* This story is completely fictitious, any resemblance to a real user story is purely coincidental</em>
  
 And the first test for that story would likely be;
 
->
->  	Given a nightly orders load file
-> 	When the file arrives on the landing area
->  	Then Nightly Orders are loaded into the ODS
->
+```gherkin
+  	Given a nightly orders load file
+ 	When the file arrives on the landing area
+  	Then Nightly Orders are loaded into the ODS
+```
 
 Each participant would then add additional scenarios that flesh out the work related to the original story.
 
 Some example tests might be;
 
->
->  Scenario: Empty Orders File
->    Given an empty nightly orders load file
->    When the file arrives on the landing area
->    Then no changes occur in the ODS
->    And an empty file notification is logged
->
+```gherkin
+	Scenario: Empty Orders File
+	Given an empty nightly orders load file
+	When the file arrives on the landing area
+	Then no changes occur in the ODS
+	And an empty file notification is logged
+```
 
->    
->  Scenario: Corrupt Orders File
->    Given a corrupt nightly orders load file
->    When the file arrives on the landing area
->    Then no changes occur in the ODS
->    And a corrupt file notification is logged
->
+```gherkin  
+  	Scenario: Corrupt Orders File
+	Given a corrupt nightly orders load file
+	When the file arrives on the landing area
+	Then no changes occur in the ODS
+	And a corrupt file notification is logged
+```
 
->    
->  Scenario: Partially Corrupt Orders File
->    Given a partially corrupt nightly orders load file
->    When the file arrives on the landing area
->    Then no changes occur in the ODS
->    And a corrupt file notification is logged
->
+```gherkin  
+	Scenario: Partially Corrupt Orders File
+	Given a partially corrupt nightly orders load file
+	When the file arrives on the landing area
+	Then no changes occur in the ODS
+	And a corrupt file notification is logged
+```
 
 Using Cucumber-JVM we can automate the execution of these tests.
 Our motivations for automation being
